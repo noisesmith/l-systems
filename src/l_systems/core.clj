@@ -20,7 +20,7 @@ rule2
   [rule sq]
   (let [[match replacement] rule
         length (count match)]
-    (prn match replacement sq)
+    ;(prn match replacement sq)
     (if (= (take length sq) match)
       [replacement (drop length sq)]
       nil)))
@@ -34,12 +34,16 @@ rule2
 )
 
 
+(range 10)
+(partition 2 (range 10))
+
 (defn try-rules
   [rules sq]
   (first (keep identity (map #(try-rule % sq) (partition 2 rules)))))
 
 (defn expand [rule-set sq]
-  (loop [out [] in sq]
+  (loop [out [],
+         in sq]
     (let [[replacement remaining :as result] (try-rules rule-set in)]
       (cond
        (empty? in) out
@@ -51,4 +55,16 @@ rule2
 (expand rule1 s)
 (expand rule1 z)
 (expand rule2 s)
+
+(clojure.pprint/pprint (take 10 (iterate (partial expand rule2) s)))
+'([a b c d e f g]
+ (a b c c d a b g)
+ (a b c c c d a b c g)
+ (a b c c c c d a b c c g)
+ (a b c c c c c d a b c c c g)
+ (a b c c c c c c d a b c c c c g)
+ (a b c c c c c c c d a b c c c c c g)
+ (a b c c c c c c c c d a b c c c c c c g)
+ (a b c c c c c c c c c d a b c c c c c c c g)
+ (a b c c c c c c c c c c d a b c c c c c c c c g))
 )
