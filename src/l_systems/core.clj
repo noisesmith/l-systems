@@ -1,21 +1,5 @@
 (ns l-systems.core)
-
-(def s '[a b c d e f g])
-
-
-(def rule1
-  '[[a b] [a b c]])
-
-(def rule2
-  '[[a b] [a b c]
-    [e f] [a b]])
-
-rule1
-rule2
-
-
-(take-while seq (iterate rest (range 10)))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn try-rule
   [rule sq]
   (let [[match replacement] rule
@@ -25,46 +9,41 @@ rule2
       [replacement (drop length sq)]
       nil)))
 
-
-(def z '[b q 2 2 3])
-
-(comment
-  (try-rule rule1 s)
-  (try-rule rule1 z)
-)
-
-
-(range 10)
-(partition 2 (range 10))
-
 (defn try-rules
   [rules sq]
-  (first (keep identity (map #(try-rule % sq) (partition 2 rules)))))
+  (or (first (keep #(try-rule % sq) (partition 2 rules)))
+      [(take 1 sq) (drop 1 sq)]))
 
-(defn expand [rule-set sq]
+(defn expand-
+  [rule-set sq]
   (loop [out [],
-         in sq]
+         in (seq sq)]
     (let [[replacement remaining :as result] (try-rules rule-set in)]
-      (cond
-       (empty? in) out
-       (not (nil? result)) (recur (concat out replacement) remaining)
-       :else (recur (concat out (take 1 in)) (rest in))))))
+      (if (seq remaining)
+        (recur (concat out replacement) remaining)
+        (concat out replacement)))))
 
+(defn coercion-from
+  [input]
+  (get
+   {(class "") (partial apply str)
+    (class []) (partial into [])}
+   (class input)
+   identity))
 
-(comment
-(expand rule1 s)
-(expand rule1 z)
-(expand rule2 s)
+(defn expand
+  [rule-set sq]
+  ((coercion-from sq) (expand- rule-set sq)))
 
-(clojure.pprint/pprint (take 10 (iterate (partial expand rule2) s)))
-'([a b c d e f g]
- (a b c c d a b g)
- (a b c c c d a b c g)
- (a b c c c c d a b c c g)
- (a b c c c c c d a b c c c g)
- (a b c c c c c c d a b c c c c g)
- (a b c c c c c c c d a b c c c c c g)
- (a b c c c c c c c c d a b c c c c c c g)
- (a b c c c c c c c c c d a b c c c c c c c g)
- (a b c c c c c c c c c c d a b c c c c c c c c g))
-)
+(defn expansions
+  [count rule-set sq]
+  (->> (seq sq)
+       (iterate (partial expand- rule-set))
+       (map (coercion-from sq))
+       (take count)))
+
+(defn string-rules
+  "given a rule-set for one character symbols, makes a string rule"
+  [rule-set]
+  (for [clause rule-set]
+    (map (comp first name) clause)))
