@@ -1,10 +1,9 @@
 (ns l-systems.core)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn try-rule
   [rule sq]
   (let [[match replacement] rule
         length (count match)]
-    ;(prn match replacement sq)
     (if (= (take length sq) match)
       [replacement (drop length sq)]
       nil)))
