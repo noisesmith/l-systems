@@ -7,25 +7,25 @@
 (def input-2 '[b q 2 2 3])
 
 (def rule-1
-  '[[a b] [a b c]])
+  [(l/simple-rule '[a b] '[a b c])])
 
 (def rule-2
-  '[[a b] [a b c]
-    [e f] [a b]])
+  [(l/simple-rule '[a b] '[a b c])
+   (l/simple-rule '[e f] '[a b])])
 
 (def rule-3
-  '[[a] [a b]
-    [b a] [c]])
+  [(l/string-rule '[a] '[a b])
+   (l/string-rule '[b a] '[c])])
 
 (defn try-rule-1
   []
-  (l/try-rule rule-1 input-1))
+  (l/try-rules rule-1 input-1))
 #_ [[a b c] [c d e f g]]
 
 (defn try-rule-1'
   []
-  (l/try-rule rule-1 input-2))
-#_ nil
+  (l/try-rules rule-1 input-2))
+#_ [[b] [q 2 2 3]]
 
 (defn expand-1
   []
@@ -44,7 +44,7 @@
 
 (defn expansions
   [n]
-  (l/expansions n (l/string-rules rule-3) "abababaaabbbaaabbb"))
+  (l/expansions n rule-3 "abababaaabbbaaabbb"))
 
 #_ ["abababaaabbbaaabbb"
     "abcccababbbcababbbb"
